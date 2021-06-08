@@ -6,32 +6,24 @@ import botocore
 from boto3.dynamodb.conditions import Key
 from authlib.integrations.requests_client import OAuth2Session
 
-NOTION_CLIENT_ID = 'f752b2cc-317c-4532-bec9-0376d23fb609'
-NOTION_CLIENT_SECRET = 'secret_XYdM3l7VI3fRK4ewxd0ORTFEPwlx8oTyEpDN77mW90e'
-NOTION_AUTH_URL = 'https://api.notion.com/v1/oauth/authorize'
-NOTION_TOKEN_URL = 'https://api.notion.com/v1/oauth/token'
-NOTION_REDIRECT_URI = 'http://localhost:3000/callback/notion'
-
 dynamodb = boto3.resource('dynamodb')
-users_table = dynamodb.Table('users')
-PRIMARY_COLUMN_NAME = "user_id"
+users_table = dynamodb.Table('tiles')
+PRIMARY_COLUMN_NAME = "tile_id"
 
     
-def get_user_info(email):
+def get_user_info(tile_number):
     '''
-        params: email(str)
+        params: tile_number
     '''
-    
-    print(f"get_user_info, email: {email}")
     try:
         response = users_table.scan(
-            ProjectionExpression="user_id",
-            FilterExpression=Key('email').eq(email)
+            ProjectionExpression="email, tile_number, instagram_link, twitter_link, website, img, buyer_name, is_bought",
+            FilterExpression=Key('tile_number').eq(tile_number)
         )
         print("response")
         print(response)
         if response['Count'] > 0:
-            return response['Items'][0]['user_id']
+            return response['Items'][0]
         else:
             return None
     except Exception as e:
@@ -43,58 +35,18 @@ def get_user_info(email):
           
         }
     
-
-def create_authorization_url():
-    notion_session = OAuth2Session(NOTION_CLIENT_ID)
-    return notion_session.create_authorization_url(NOTION_AUTH_URL, redirect_uri=NOTION_REDIRECT_URI)
-    
-    
-def add_state_to_user(user_id, authorization_url, state):
-    '''
-        add state to user
-    '''
-    notion_info = {
-        "authorization_info": {
-            "authorization_url": authorization_url,
-            "state": state
-        }
-    }
-    
-    try:
-        response = users_table.update_item(
-            Key={
-                PRIMARY_COLUMN_NAME: user_id
-            },
-            UpdateExpression="set connected_app.notion=:o, connected=:c",
-            ExpressionAttributeValues={
-                ":o": notion_info,
-                ":c": False
-            },
-            ReturnValues="UPDATED_NEW"
-        )
-        
-        return response 
-    
-    except botocore.exceptions.ClientError as error: 
-        print (error)
-        return None
-        
 def handler(event, context):
     '''
-        notion_api_authorization
+        getTile
     '''
     print("event")
     print(event)
     
-    user_id = get_user_info(event['email'])
-    authorization_url, state = create_authorization_url()
-    res = add_state_to_user(user_id, authorization_url, state)
-    print(f"response {res}")
+    tile_info = get_user_info(event['tile_number'])
     
     return {
         'statusCode': 200,
         'body': {
-            "authorization_url": authorization_url,
-            "state": state
+            "body": tile_info
         }
     }

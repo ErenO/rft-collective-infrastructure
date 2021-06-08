@@ -8,23 +8,26 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('tiles')
 
 
-def lambda_handler(event, context):
+def handler(event, context):
     '''
         lambda name: createTile
     '''
-    post_data = base64.b64decode(event['body'])
-    dict_str = post_data.decode("UTF-8")
-    jsonUser = json.loads(dict_str)
-    
+    if isinstance(event['body'], str):
+        post_data = base64.b64decode(event['body'])
+        dict_str = post_data.decode("UTF-8")
+        data = json.loads(dict_str)
+    else:
+        data = event['body']
+        
     tile_id = str(uuid.uuid4())
-    tile_number = jsonUser['id']
-    instagram_link = jsonUser['instagramLink']
-    twitter_link = jsonUser['twitterLink']
-    website = jsonUser['website']
-    img = jsonUser['img']
-    buyer_name = jsonUser['buyerName']
-    is_bought = jsonUser['isBought']
-    email = jsonUser['email']
+    tile_number = data['id']
+    instagram_link = data['instagramLink']
+    twitter_link = data['twitterLink']
+    website = data['website']
+    img = data['img']
+    buyer_name = data['buyerName']
+    is_bought = data['isBought']
+    email = data['email']
     
     try:
         table.put_item(Item={
