@@ -8,9 +8,9 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('tiles')
 
 
-def lambda_handler(event, context):
+def handler(event, context):
     '''
-        lambda name: createTile
+        lambda name: updateTile
     '''
     if isinstance(event['body'], str):
         post_data = base64.b64decode(event['body'])

@@ -11,14 +11,14 @@ users_table = dynamodb.Table('tiles')
 PRIMARY_COLUMN_NAME = "tile_id"
 
     
-def get_user_info(tile_number):
+def get_user_info(tile_number, email):
     '''
         params: tile_number
     '''
     try:
         response = users_table.scan(
             ProjectionExpression="email, tile_number, instagram_link, twitter_link, website, img, buyer_name, is_bought",
-            FilterExpression=Key('tile_number').eq(tile_number)
+            FilterExpression=Key('tile_number').eq(tile_number) & Key('email').eq(email)
         )
         print("response")
         print(response)
@@ -42,7 +42,7 @@ def handler(event, context):
     print("event")
     print(event)
     
-    tile_info = get_user_info(event['tile_number'])
+    tile_info = get_user_info(event['tile_number'], event['email'])
     
     return {
         'statusCode': 200,

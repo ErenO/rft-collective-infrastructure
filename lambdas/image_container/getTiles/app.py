@@ -9,7 +9,6 @@ from authlib.integrations.requests_client import OAuth2Session
 dynamodb = boto3.resource('dynamodb')
 users_table = dynamodb.Table('tiles')
 PRIMARY_COLUMN_NAME = "tile_id"
-
     
 def get_user_info():
     '''
@@ -18,7 +17,7 @@ def get_user_info():
     try:
         response = users_table.scan(
             ProjectionExpression="email, tile_number, instagram_link, twitter_link, website, img, buyer_name, is_bought",
-            FilterExpression=Key('tile_number').between(1, 2500)
+            FilterExpression=Key('tile_number').between(0, 2500)
         )
         print("response")
         print(response)
@@ -47,6 +46,6 @@ def handler(event, context):
     return {
         'statusCode': 200,
         'body': {
-            "body": tile_info
+            "tiles": tile_info
         }
     }
