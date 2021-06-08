@@ -10,7 +10,7 @@ dynamodb = boto3.resource('dynamodb')
 users_table = dynamodb.Table('tiles')
 PRIMARY_COLUMN_NAME = "tile_id"
     
-def get_user_info():
+def get_tiles_info():
     '''
         params: tile_number
     '''
@@ -22,7 +22,7 @@ def get_user_info():
         print("response")
         print(response)
         if response['Count'] > 0:
-            return response['Items'][0]
+            return response['Items']
         else:
             return None
     except Exception as e:
@@ -41,11 +41,11 @@ def handler(event, context):
     print("event")
     print(event)
     
-    tile_info = get_user_info()
+    tiles_info = get_tiles_info()
     
     return {
         'statusCode': 200,
         'body': {
-            "tiles": tile_info
+            "tiles": tiles_info
         }
     }

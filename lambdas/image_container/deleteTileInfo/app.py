@@ -9,7 +9,6 @@ Primary_column_name = 'tile_id'
 
 def handler(event, context):
     '''
-        deleteTileInfo
     '''
     if isinstance(event['body'], str):
         post_data = base64.b64decode(event['body'])
@@ -21,10 +20,11 @@ def handler(event, context):
     try:
         table.delete_item(
             Key={
-                'tile_number': event['tile_number']
+                Primary_column_name: data['tile_id']
             }
         )
-        return {"statusCode": 200, "message": "User has been deleted"}
+        print ("done")
+        return {"statusCode": 200, "message": "Tiles has been deleted"}
     except botocore.exceptions.ClientError as error: 
         print (error)
         return error
